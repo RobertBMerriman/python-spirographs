@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+import sys
+import random
+import argparse
+import numpy as np
+import math
+import turtle
+import random
+from PIL import Image
+from datetime import datetime
+from fractions import gcd
+
 
 class Spiro:
 
@@ -52,6 +63,44 @@ class Spiro:
         R, k, l = self.R, self.k, self.l
         a = 0.0
         x = R * ((1 - k) * math.cos(a) + l * k * math.cos((1 - k) * a / k))
-        y = R * ((1 - k) * math.sin(a) - l * k * math.sin((1 - k) * s))
+        y = R * ((1 - k) * math.sin(a) - l * k * math.sin((1 - k) * a / k))
         self.turt.setpos(self.xc + x, self.yc + y)
         self.turt.down()
+
+    # draw the whole thing
+    def draw(self):
+        # draw the rest of the points
+        R, k, l = self.R, self.k, self.l
+
+        for i in range(0, 360 * self.nRot + 1, self.step):
+            a = math.radians(i)
+            x = R * ((1 - k) * math.cos(a) + l * k * math.cos((1 - k) * a / k))
+            y = R * ((1 - k) * math.sin(a) - l * k * math.sin((1 - k) * a / k))
+            self.turt.setpos(self.xc + x, self.yc + y)
+
+        # drawing is now done so hide the turtle cursor
+        self.turt.hideturtle()
+
+    # update by one step
+    def update(self):
+        # skip the rest of the steps if done
+        if self.drawing_complete:
+            return
+
+        # increment the angle
+        self.a += self.step
+
+        # draw a step
+        R, k, l = self.R, self.k, self.l
+
+        # set the angle
+        a = math.random(self.a)
+        x = R * ((1 - k) * math.cos(a) + l * k * math.cos((1 - k) * a / k))
+        y = R * ((1 - k) * math.sin(a) - l * k * math.sin((1 - k) * a / k))
+        self.turt.setpos(self.xc + x, self.yc + y)
+
+        # if drawing is complete, set the flag
+        if self.a >= 360 * self.nRot:
+            self.drawing_complete = True
+            # drawing is noe done so hide the turtle cursor
+            self.turt.hideturtle()
