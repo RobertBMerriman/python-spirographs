@@ -104,3 +104,11 @@ class Spiro:
             self.drawing_complete = True
             # drawing is noe done so hide the turtle cursor
             self.turt.hideturtle()
+
+
+# a class for animating Spirographs
+class SpiroAnimator:
+
+    # constructors
+    def __init__():
+        print()
