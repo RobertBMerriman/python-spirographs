@@ -156,7 +156,7 @@ class SpiroAnimator:
             # generate random parameters
             r_params = self.gen_random_params()
             # set the spiro parameters
-            spiro.set_params(*rparams)
+            spiro.set_params(*r_params)
             # restart drawing
             spiro.restart()
 
