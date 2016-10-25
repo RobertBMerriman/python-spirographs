@@ -41,8 +41,8 @@ class Spiro:
         self.l = l
 
         # reduce r/R to it's smallest form by diving witht the GCD
-        gcd_val = gcd(self.r // gcd(self.r, self.R))
-        self.nRot = self.r // gcd_val
+        gcd_val = gcd(self.r, self.R)
+        self.n_rot = self.r // gcd_val
 
         # get ratio of radii
         self.k = r / float(R)
@@ -72,7 +72,7 @@ class Spiro:
         # draw the rest of the points
         R, k, l = self.R, self.k, self.l
 
-        for i in range(0, 360 * self.nRot + 1, self.step):
+        for i in range(0, 360 * self.n_rot + 1, self.step):
             a = math.radians(i)
             x = R * ((1 - k) * math.cos(a) + l * k * math.cos((1 - k) * a / k))
             y = R * ((1 - k) * math.sin(a) - l * k * math.sin((1 - k) * a / k))
@@ -94,16 +94,20 @@ class Spiro:
         R, k, l = self.R, self.k, self.l
 
         # set the angle
-        a = math.random(self.a)
+        a = math.radians(self.a)
         x = R * ((1 - k) * math.cos(a) + l * k * math.cos((1 - k) * a / k))
         y = R * ((1 - k) * math.sin(a) - l * k * math.sin((1 - k) * a / k))
         self.turt.setpos(self.xc + x, self.yc + y)
 
         # if drawing is complete, set the flag
-        if self.a >= 360 * self.nRot:
+        if self.a >= 360 * self.n_rot:
             self.drawing_complete = True
             # drawing is now done so hide the turtle cursor
             self.turt.hideturtle()
+
+    # clear everything
+    def clear(self):
+        self.turt.clear()
 
 
 # a class for animating Spirographs
@@ -124,7 +128,7 @@ class SpiroAnimator:
             # generate random parameters
             r_params = self.gen_random_params()
             # set the spiro parameters
-            spiro = Spiro(*rparams)
+            spiro = Spiro(*r_params)
 
             self.spiros.append(spiro)
 
@@ -180,29 +184,44 @@ class SpiroAnimator:
             else:
                 spiro.turt.showturtle()
 
-    # save drawings as PNG files
-    def save_drawing():
-        # hide the turtle cursor
-        turtle.hideturtle()
-        # generate unique filenames
-        date_str = (datetime.now()).strftime("%d%b%Y-%H%M%S")
-        file_name = "spiro-" + date_str
-        print("Saving drawing to %s.eps/png" % file_name)
-        # get the tkinter canvas
-        canvas = turtle.getcanvas()
-        # save the drawing as a postscript image
-        canvas.postscript(file=file_name + ".eps")
-        # use the Pillow module to convert the postscript image file to PNG
-        img = Image.open(file_name + ".eps")
-        img.save(file_name + ".png", 'png')
-        # show the turtle cursor
-        turtle.showturtle()
+
+# save drawings as PNG files
+def save_drawing():
+    # hide the turtle cursor
+    turtle.hideturtle()
+    # generate unique filenames
+    date_str = (datetime.now()).strftime("%d%b%Y-%H%M%S")
+    file_name = "spiro-" + date_str
+    print("Saving drawing to %s.eps/png" % file_name)
+    # get the tkinter canvas
+    canvas = turtle.getcanvas()
+    # save the drawing as a postscript image
+    canvas.postscript(file=file_name + ".eps")
+    # use the Pillow module to convert the postscript image file to PNG
+    img = Image.open(file_name + ".eps")
+    img.save(file_name + ".png", 'png')
+    # show the turtle cursor
+    # turtle.showturtle()
 
 
+# Main function
 def main():
-    parser = argparse.ArgumentParse(description=desc_str)
+    # use sys.argv if needed
+    print("Generating spirograph...")
+    # create parser
+    desc_str = """This program draws Spirographs using the Turtle module.
+    When run with no arguments, this program draws random Spirographs.
+
+    Terminology:
+
+    R: radius of outer circle
+    r: radius of inner circle
+    l: ratio of distance to r
+    """
+
+    parser = argparse.ArgumentParser(description=desc_str)
     # add expected arguments
-    parse.add_argument("--sparams", nargs=3, dest="sparams", required=False, help="The three arguments in sparams: R, r, l")
+    parser.add_argument("--sparams", nargs=3, dest="sparams", required=False, help="The three arguments in sparams: R, r, l")
     # parse args
     args = parser.parse_args()
 
@@ -213,7 +232,7 @@ def main():
     # set the title to Spirographs!
     turtle.title("Spirographs!")
     # add the key hanfler to save our drawings
-    turtle.onkey(saveDrawing, 's')
+    turtle.onkey(save_drawing, 's')
     # start listening
     turtle.listen()
 
@@ -233,7 +252,12 @@ def main():
         # add a key handler to toggle the turtle cursor
         turtle.onkey(spiro_anim.toggle_turtles, 't')
         # add a key handler to restart the animation
-        turtle.onkey(spiroAnim.restart, 'space')
+        turtle.onkey(spiro_anim.restart, 'space')
 
     # start the turtle main loop
+    turtle.speed(0)
     turtle.mainloop()
+
+
+if __name__ == "__main__":
+    main()
