@@ -102,7 +102,7 @@ class Spiro:
         # if drawing is complete, set the flag
         if self.a >= 360 * self.nRot:
             self.drawing_complete = True
-            # drawing is noe done so hide the turtle cursor
+            # drawing is now done so hide the turtle cursor
             self.turt.hideturtle()
 
 
@@ -110,5 +110,130 @@ class Spiro:
 class SpiroAnimator:
 
     # constructors
-    def __init__():
-        print()
+    def __init__(self, N):
+        # set the timer value in milliseconds
+        self.delta_t = 10
+        # get the window dimensions
+        self.width = turtle.window_width()
+        self.height = turtle.window_height()
+
+        # creeate the Spiro objects
+        self.spiros = []
+
+        for i in range(N):
+            # generate random parameters
+            r_params = self.gen_random_params()
+            # set the spiro parameters
+            spiro = Spiro(*rparams)
+
+            self.spiros.append(spiro)
+
+        # call timer
+        turtle.ontimer(self.update, self.delta_t)
+
+    # generate random parameters
+    def gen_random_params(self):
+        width, height = self.width, self.height
+
+        xc = random.randint(-width // 2, width // 2)
+        yc = random.randint(-height // 2, height // 2)
+        col = (random.random(), random.random(), random.random())
+        R = random.randint(50, min(width, height) // 2)
+        r = random.randint(10, 9 * R // 10)
+        l = random.uniform(0.1, 0.9)
+
+        return (xc, yc, col, R, r, l)
+
+    # restart spiro drawing
+    def restart(self):
+        for spiro in self.spiros:
+            # clear
+            spiro.clear()
+            # generate random parameters
+            r_params = self.gen_random_params()
+            # set the spiro parameters
+            spiro.set_params(*rparams)
+            # restart drawing
+            spiro.restart()
+
+    def update(self):
+        # update all spiros
+        num_complete = 0
+        for spiro in self.spiros:
+            # update
+            spiro.update()
+            # count completed spiros
+            if spiro.drawing_complete:
+                num_complete += 1
+
+        # restart if all spiros are complte
+        if num_complete == len(self.spiros):
+            self.restart()
+        # call the timer
+        turtle.ontimer(self.update, self.delta_t)
+
+    # toggle turtle cursor on and off
+    def toggle_turtles(self):
+        for spiro in self.spiros:
+            if spiro.turt.isvisible():
+                spiro.turt.hideturtle()
+            else:
+                spiro.turt.showturtle()
+
+    # save drawings as PNG files
+    def save_drawing():
+        # hide the turtle cursor
+        turtle.hideturtle()
+        # generate unique filenames
+        date_str = (datetime.now()).strftime("%d%b%Y-%H%M%S")
+        file_name = "spiro-" + date_str
+        print("Saving drawing to %s.eps/png" % file_name)
+        # get the tkinter canvas
+        canvas = turtle.getcanvas()
+        # save the drawing as a postscript image
+        canvas.postscript(file=file_name + ".eps")
+        # use the Pillow module to convert the postscript image file to PNG
+        img = Image.open(file_name + ".eps")
+        img.save(file_name + ".png", 'png')
+        # show the turtle cursor
+        turtle.showturtle()
+
+
+def main():
+    parser = argparse.ArgumentParse(description=desc_str)
+    # add expected arguments
+    parse.add_argument("--sparams", nargs=3, dest="sparams", required=False, help="The three arguments in sparams: R, r, l")
+    # parse args
+    args = parser.parse_args()
+
+    # set the width of the drawing window to 80 percent of the screen width
+    turtle.setup(width=0.8)
+    # set the curor shape to turtle
+    turtle.shape("turtle")
+    # set the title to Spirographs!
+    turtle.title("Spirographs!")
+    # add the key hanfler to save our drawings
+    turtle.onkey(saveDrawing, 's')
+    # start listening
+    turtle.listen()
+
+    # hide the main turtle curosr
+    turtle.hideturtle()
+
+    # check for any arguments sent to --sparams and draw the Spirograph
+    if args.sparams:
+        params = [float(x) for x in args.sparams]
+        # draw the Spirograph with the given parameters
+        col = (0.0, 0.0, 0.0)
+        spiro = Spiro(0, 0, col, *params)
+        spiro.draw()
+    else:
+        # create the animator object
+        spiro_anim = SpiroAnimator(4)
+        # add a key handler to toggle the turtle cursor
+        turtle.onkey(spiro_anim.toggle_turtles, 't')
+        # add a key handler to restart the animation
+        turtle.onkey(spiroAnim.restart, 'space')
+
+    # start the turtle main loop
+    turtle.mainloop()
